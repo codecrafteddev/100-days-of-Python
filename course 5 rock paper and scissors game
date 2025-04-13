@@ -1,0 +1,52 @@
+
+    _______
+---'   ____)
+      (_____)
+      (_____)
+      (____)
+---.__(___)
+'''
+
+paper = '''
+    _______
+---'   ____)____
+          ______)
+          _______)
+         _______)
+---.__________)
+'''
+
+scissors = '''
+    _______
+---'   ____)____
+          ______)
+       __________)
+      (____)
+---.__(___)
+'''
+import random
+
+# Step 1: Create a list of options
+options = ["rock", "paper", "scissors"]
+
+# Step 2: Ask the user to make a choice
+user_choice = input("Choose rock, paper, or scissors: ").lower()
+
+# Step 3: Computer makes a random choice
+computer_choice = random.choice(options)
+
+# Step 4: Display both choices
+print(f"You chose: {user_choice}")
+print(f"Computer chose: {computer_choice}")
+
+# Step 5: Decide the winner
+if user_choice == computer_choice:
+    print("It's a tie!")
+elif (user_choice == "rock" and computer_choice == "scissors") or \
+     (user_choice == "scissors" and computer_choice == "paper") or \
+     (user_choice == "paper" and computer_choice == "rock"):
+    print("You win!")
+elif user_choice in options:
+    print("Computer wins!")
+else:
+    print("Invalid choice. Try again!")
