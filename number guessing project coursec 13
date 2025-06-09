@@ -1,0 +1,14 @@
+"/Users/abdi/PycharmProjects/100 Days of Code - The Complete Python Pro Bootcamp/.idea/VirtualEnvironment/bin/python" /Users/abdi/PycharmProjects/100 Days of Code - The Complete Python Pro Bootcamp/Day 12/Number Guessing Project/main.py 
+/Users/abdi/PycharmProjects/100 Days of Code - The Complete Python Pro Bootcamp/Day 12/Number Guessing Project/main.py:4: SyntaxWarning: invalid escape sequence '\ '
+  print("""
+
+  ____                     _   _                                  _               
+ / ___|_   _  ___  ___ ___| \ | | ___  _ __   ___ _ __ __ _ _ __ | |_ ___  _ __   
+| |  _| | | |/ _ \/ __/ __|  \| |/ _ \| '_ \ / _ \ '__/ _` | '_ \| __/ _ \| '__|  
+| |_| | |_| |  __/\__ \__ \ |\  | (_) | | | |  __/ | | (_| | |_) | || (_) | |     
+ \____|\__,_|\___||___/___/_| \_|\___/|_| |_|\___|_|  \__,_| .__/ \__\___/|_|     
+                                                         |_|                     
+
+Welcome to the Guess the Number Game!
+I'm thinking of a number between 1 and 100.
+Choose a difficulty. Type 'easy' or 'hard
