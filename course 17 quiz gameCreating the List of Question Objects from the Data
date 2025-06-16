@@ -1,0 +1,69 @@
+📄 question_model.py
+python
+Copy
+Edit
+class Question:
+    def __init__(self, text, answer):
+        self.text = text
+        self.answer = answer
+📄 data.py
+python
+Copy
+Edit
+question_data = [
+    {"text": "The sky is blue.", "answer": "True"},
+    {"text": "There are 365 days in a year.", "answer": "True"},
+    {"text": "2 + 2 = 5", "answer": "False"},
+    {"text": "The Earth is flat.", "answer": "False"},
+    {"text": "Python is a type of snake and a programming language.", "answer": "True"},
+]
+📄 quiz_brain.py
+python
+Copy
+Edit
+class QuizBrain:
+    def __init__(self, q_list):
+        self.question_number = 0
+        self.question_list = q_list
+        self.score = 0
+
+    def still_has_questions(self):
+        return self.question_number < len(self.question_list)
+
+    def next_question(self):
+        current_question = self.question_list[self.question_number]
+        self.question_number += 1
+        user_answer = input(f"Q{self.question_number}: {current_question.text} (True/False): ")
+        self.check_answer(user_answer, current_question.answer)
+
+    def check_answer(self, user_answer, correct_answer):
+        if user_answer.lower() == correct_answer.lower():
+            print("You got it right!")
+            self.score += 1
+        else:
+            print("That's wrong.")
+        print(f"The correct answer was: {correct_answer}")
+        print(f"Your current score is: {self.score}/{self.question_number}\n")
+📄 main.py
+python
+Copy
+Edit
+from question_model import Question
+from data import question_data
+from quiz_brain import QuizBrain
+
+# Create question bank from data
+question_bank = []
+for item in question_data:
+    question_text = item["text"]
+    question_answer = item["answer"]
+    question_bank.append(Question(question_text, question_answer))
+
+# Start the quiz
+quiz = QuizBrain(question_bank)
+
+while quiz.still_has_questions():
+    quiz.next_question()
+
+print("You've completed the quiz.")
+print(f"Your final score was: {quiz.score}/{quiz.question_number}")
