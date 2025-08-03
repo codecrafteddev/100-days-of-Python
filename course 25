@@ -1,0 +1,54 @@
+"""
+Day 25: Reading CSV Data with Pandas
+------------------------------------
+This program shows how to:
+1. Read weather data from a CSV file.
+2. Analyze it using Python's Pandas library.
+3. Save new data back into a CSV file.
+"""
+
+import pandas
+
+# Step 1: Create weather data (CSV content) directly in the code
+weather_data = {
+    "day": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "temp": [12, 14, 15, 14, 21, 22, 24],
+    "condition": ["Sunny", "Rain", "Sunny", "Cloudy", "Sunny", "Rain", "Sunny"]
+}
+
+# Step 2: Make a DataFrame from the dictionary
+data = pandas.DataFrame(weather_data)
+print("Full Table:")
+print(data)
+
+# Step 3: Get all temperatures
+temps = data["temp"].to_list()
+print("\nAll Temperatures:", temps)
+
+# Step 4: Calculate average temperature
+average_temp = data["temp"].mean()
+print("Average Temperature:", average_temp)
+
+# Step 5: Find the highest temperature
+max_temp = data["temp"].max()
+print("Max Temperature:", max_temp)
+
+# Step 6: Get the row with the max temperature
+hottest_day = data[data.temp == max_temp]
+print("\nHottest Day:")
+print(hottest_day)
+
+# Step 7: Get Monday’s data
+monday = data[data.day == "Monday"]
+print("\nMonday's Data:")
+print(monday)
+
+# Step 8: Convert Monday’s temp to Fahrenheit
+monday_temp_c = int(monday.temp)
+monday_temp_f = monday_temp_c * 9/5 + 32
+print(f"Monday's Temp in Fahrenheit: {monday_temp_f}")
+
+# Step 9: Save a new CSV with only sunny days
+sunny_days = data[data.condition == "Sunny"]
+sunny_days.to_csv("sunny_days.csv", index=False)
+print("\nSunny days saved to sunny_days.csv")
