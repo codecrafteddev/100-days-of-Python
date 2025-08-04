@@ -1,0 +1,30 @@
+# ---------------- NATO PHONETIC ALPHABET PROJECT ----------------
+# This Python program:
+# - Uses pandas to read a CSV file ('nato_phonetic_alphabet.csv')
+#   containing the NATO phonetic alphabet.
+# - Creates a dictionary with letters as keys and code words as values.
+# - Prompts the user to enter a word.
+# - Converts the word into a list of phonetic code words using list comprehension.
+# - Includes error handling to prevent crashes from non-alphabet characters.
+#
+# Example:
+# Input:  Code
+# Output: ['Charlie', 'Oscar', 'Delta', 'Echo']
+# ---------------------------------------------------------------
+
+import pandas as pd
+
+# Step 1: Read CSV and create phonetic dictionary
+data = pd.read_csv("nato_phonetic_alphabet.csv")
+phonetic_dictionary = {row.letter: row.code for (index, row) in data.iterrows()}
+
+# Step 2: Get user input and convert to phonetic alphabet
+while True:
+    word = input("Enter a word: ").upper()
+    try:
+        output_list = [phonetic_dictionary[letter] for letter in word]
+    except KeyError:
+        print("Sorry, only letters A-Z are allowed. Please try again.")
+    else:
+        print(output_list)
+        break
