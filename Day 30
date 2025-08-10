@@ -1,0 +1,30 @@
+"""
+NATO Phonetic Alphabet Project with Exception Handling
+
+This program converts a user-input word into its NATO phonetic alphabet equivalent.
+- Loads the phonetic alphabet dictionary from a CSV file.
+- Prompts the user to enter a word.
+- Converts each letter into the corresponding phonetic code.
+- Handles invalid input (non-alphabet characters) gracefully using exception handling.
+- Re-prompts the user until valid input is provided.
+"""
+
+import pandas as pd
+
+# Read CSV and create phonetic dictionary
+data = pd.read_csv("nato_phonetic_alphabet.csv")
+phonetic_dict = {row.letter: row.code for _, row in data.iterrows()}
+
+def generate_phonetic():
+    word = input("Enter a word: ").upper()
+    try:
+        # Convert each letter in the word to its phonetic code
+        phonetic_list = [phonetic_dict[letter] for letter in word]
+    except KeyError:
+        print("Sorry, only letters in the alphabet please.")
+        generate_phonetic()  # Retry on error
+    else:
+        print("Phonetic spelling:", " ".join(phonetic_list))
+
+# Start the program
+generate_phonetic()
