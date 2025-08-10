@@ -1,0 +1,58 @@
+"""
+Rain Alert Application
+This script checks the weather forecast for rain using the OpenWeatherMap API.
+If rain is expected in the next 12 hours, it sends an SMS alert via Twilio to remind you to bring an umbrella.
+API keys and phone numbers are stored securely as environment variables.
+"""
+
+import os
+import requests
+from twilio.rest import Client
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (or system environment)
+load_dotenv()
+
+# Environment variables (set these before running)
+OWM_API_KEY = os.getenv("OWM_API_KEY")                # OpenWeatherMap API key
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")  # Twilio Account SID
+TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")    # Twilio Auth Token
+TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")# Twilio phone number (sender)
+MY_PHONE_NUMBER = os.getenv("MY_PHONE_NUMBER")        # Your phone number (receiver)
+
+# Your location coordinates (example: New York City)
+LATITUDE = 40.7128
+LONGITUDE = -74.0060
+
+def check_for_rain():
+    """Check the next 12 hours of weather for rain conditions."""
+    url = (
+        f"https://api.openweathermap.org/data/2.5/onecall?"
+        f"lat={LATITUDE}&lon={LONGITUDE}&exclude=current,minutely,daily,alerts&appid={OWM_API_KEY}"
+    )
+    response = requests.get(url)
+    response.raise_for_status()
+    weather_data = response.json()
+
+    # Check hourly forecast descriptions for rain
+    for hour in weather_data["hourly"][:12]:
+        for condition in hour["weather"]:
+            if "rain" in condition["description"].lower():
+                return True
+    return False
+
+def send_sms_alert():
+    """Send SMS alert using Twilio."""
+    client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+    message = client.messages.create(
+        body="☔️ Rain is expected today. Don't forget to bring an umbrella!",
+        from_=TWILIO_PHONE_NUMBER,
+        to=MY_PHONE_NUMBER
+    )
+    print(f"Alert sent! Message SID: {message.sid}")
+
+if __name__ == "__main__":
+    if check_for_rain():
+        send_sms_alert()
+    else:
+        print("No rain expected in the next 12 hours.")
