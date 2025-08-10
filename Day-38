@@ -1,0 +1,65 @@
+"""
+Exercise Tracking Application with Sheety API and Bearer Token Authentication
+
+This example demonstrates how to send workout data to a Google Sheet using Sheety API,
+including authenticating requests via Bearer Token.
+
+Key features:
+- Sends POST requests with workout data (exercise, duration, calories).
+- Adds authentication header (Bearer Token) to secure API access.
+- Example shows how to format requests properly with headers.
+
+Before running:
+- Replace YOUR_SHEETY_ENDPOINT with your Sheety API endpoint URL.
+- Replace YOUR_BEARER_TOKEN with your actual token.
+- Customize input data as needed.
+
+Reference:
+- https://requests.readthedocs.io/en/latest/user/authentication/
+- https://stackoverflow.com/questions/29931671/making-an-api-call-in-python-with-an-api-that-requires-a-bearer-token
+"""
+
+import requests
+from datetime import datetime
+
+# Your Sheety API endpoint to your Google Sheet (POST endpoint)
+sheet_endpoint = "https://api.sheety.co/YOUR_PROJECT/YOUR_SHEET/workouts"
+
+# Your Bearer Token for authentication
+BEARER_TOKEN = "YOUR_BEARER_TOKEN"
+
+# Headers including Bearer Token for auth
+headers = {
+    "Authorization": f"Bearer {BEARER_TOKEN}"
+}
+
+def log_exercise(exercise_name, duration_min, calories_burned):
+    """Send exercise data to Google Sheet via Sheety API with Bearer Token auth."""
+    now = datetime.now()
+    date_str = now.strftime("%Y-%m-%d")
+    time_str = now.strftime("%H:%M:%S")
+
+    # Construct the JSON payload as expected by your Sheety setup
+    sheet_inputs = {
+        "workout": {
+            "date": date_str,
+            "time": time_str,
+            "exercise": exercise_name,
+            "duration": duration_min,
+            "calories": calories_burned
+        }
+    }
+
+    response = requests.post(sheet_endpoint, json=sheet_inputs, headers=headers)
+
+    if response.status_code == 200 or response.status_code == 201:
+        print("Workout logged successfully!")
+    else:
+        print(f"Failed to log workout. Status code: {response.status_code}")
+        print("Response:", response.text)
+
+if __name__ == "__main__":
+    # Example usage: log a cycling workout of 45 minutes burning 400 calories
+    log_exercise("Cycling", 45, 400)
+
+    # You can call log_exercise with user input or other data sources as needed
