@@ -1,0 +1,65 @@
+<!--
+Day 43 Project: Using Color in CSS
+Course: 100 Days of Code: The Complete Python Pro Bootcamp by Dr. Angela Yu
+Description:
+This HTML page shows a clean design with a chosen color scheme applied via CSS.
+It demonstrates background color, heading color, paragraph text color,
+and accessible contrast for readability.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color Styling Example</title>
+  <style>
+    /* Light gray background for easy reading */
+    body {
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      color: #333333; /* Dark text for contrast */
+    }
+
+    /* Vibrant orange heading color to catch attention */
+    h1 {
+      color: #ff5733;
+    }
+
+    /* Slightly softer dark gray for paragraph text */
+    p {
+      color: #4d4d4d;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+
+    /* Link color with hover effect */
+    a {
+      color: #0077cc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+      color: #005999;
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to My Colorful Webpage</h1>
+  <p>
+    This is an example paragraph demonstrating good color choices.
+    The background is a soft light gray, and the text is dark enough
+    for excellent readability and accessibility.
+  </p>
+  <p>
+    Visit 
+    <a href="https://coolors.co" target="_blank" rel="noopener noreferrer">
+      Coolors.co
+    </a> 
+    to explore amazing color palettes.
+  </p>
+</body>
+</html>
