@@ -1,0 +1,31 @@
+<!--
+Movie Ranking Project (Day 41 - Web Foundation: Introduction to HTML)
+Course: 100 Days of Code: The Complete Python Pro Bootcamp by Dr. Angela Yu
+Description:
+This is a simple HTML page listing my top 3 favorite movies, ranked with brief descriptions.
+It’s an introductory project to practice basic HTML structure, headings, and paragraph tags.
+To view it, save this file as "index.html" and open it in your browser.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Movie Rankings</title>
+</head>
+<body>
+    <h1>The Best Movies According to Me</h1>
+    <h2>My Top 3 Movies of All Time</h2>
+    <hr>
+
+    <h3>1. Inception</h3>
+    <p>A mind-bending sci-fi thriller by Christopher Nolan. Layers within layers of dreams.</p>
+
+    <h3>2. The Dark Knight</h3>
+    <p>Epic superhero film with an unforgettable performance by Heath Ledger as the Joker.</p>
+
+    <h3>3. Interstellar</h3>
+    <p>A visually stunning and emotional journey through space, time, and love.</p>
+</body>
+</html>
