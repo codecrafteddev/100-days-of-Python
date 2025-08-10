@@ -1,0 +1,104 @@
+"""
+Day 47 Project: Amazon Price Tracker
+
+This Python script scrapes the price of a product from a static practice site and a live Amazon product page.
+It sends an email alert when the product price falls below a specified target price.
+
+Features:
+- Uses BeautifulSoup to scrape product prices.
+- Adds HTTP headers to mimic a real browser request.
+- Sends email notifications using SMTP with credentials stored securely in a .env file.
+- Handles both a static practice page and a live Amazon page with adaptable parsing.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+import smtplib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
+
+# --- Configurations ---
+TARGET_PRICE = 100.0
+PRACTICE_URL = "https://appbrewery.github.io/instant_pot/"
+LIVE_AMAZON_URL = "https://www.amazon.com/dp/B075CYMYK6?psc=1&ref_=cm_sw_r_cp_ud_ct_FM9M699VKHTT47YD50Q6"
+
+# Email credentials from .env file
+SMTP_SERVER = os.getenv("SMTP_ADDRESS")  # e.g., smtp.gmail.com
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
+# Headers to mimic a real browser request
+headers = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                   "AppleWebKit/537.36 (KHTML, like Gecko) "
+                   "Chrome/115.0.0.0 Safari/537.36"),
+    "Accept-Language": "en-US,en;q=0.9",
+}
+
+def get_price_and_title(url):
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    if "instant_pot" in url:
+        price_str = soup.find(class_="a-offscreen").get_text()  # e.g. "$99.99"
+        price = float(price_str.replace("$", "").strip())
+        title_tag = soup.find(id="productTitle")
+        title = title_tag.get_text().strip() if title_tag else "Instant Pot"
+        return price, title
+    
+    if "amazon.com" in url:
+        # Amazon price parsing (may change frequently)
+        # Try whole and fraction parts
+        price_whole = soup.select_one("span.a-price-whole")
+        price_fraction = soup.select_one("span.a-price-fraction")
+        if price_whole and price_fraction:
+            price_str = price_whole.get_text() + price_fraction.get_text()
+            price = float(price_str.replace(",", ""))
+        else:
+            # Fallback if not found
+            price_tag = soup.find(class_="a-offscreen")
+            price = float(price_tag.get_text().replace("$", "").replace(",", "").strip()) if price_tag else None
+
+        title_tag = soup.find(id="productTitle")
+        title = title_tag.get_text().strip() if title_tag else "Amazon Product"
+
+        return price, title
+
+    return None, None
+
+def send_email(subject, body):
+    with smtplib.SMTP(SMTP_SERVER, 587) as connection:
+        connection.starttls()
+        connection.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        message = f"Subject:{subject}\n\n{body}"
+        connection.sendmail(
+            from_addr=EMAIL_ADDRESS,
+            to_addrs=EMAIL_ADDRESS,
+            msg=message.encode("utf-8")
+        )
+    print("Email sent!")
+
+def main():
+    # Check price on practice site
+    price, title = get_price_and_title(PRACTICE_URL)
+    if price and price < TARGET_PRICE:
+        subject = f"Price Alert: {title} now at ${price}"
+        body = f"The price for {title} dropped below ${TARGET_PRICE}!\nCurrent price: ${price}\nBuy here: {PRACTICE_URL}"
+        send_email(subject, body)
+    else:
+        print(f"Practice site price is ${price}, which is above the target.")
+
+    # Check price on live Amazon site
+    price, title = get_price_and_title(LIVE_AMAZON_URL)
+    if price and price < TARGET_PRICE:
+        subject = f"Price Alert: {title} now at ${price}"
+        body = f"The price for {title} dropped below ${TARGET_PRICE}!\nCurrent price: ${price}\nBuy here: {LIVE_AMAZON_URL}"
+        send_email(subject, body)
+    else:
+        print(f"Amazon price is ${price}, which is above the target or could not be found.")
+
+if __name__ == "__main__":
+    main()
