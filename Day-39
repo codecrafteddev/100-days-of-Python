@@ -1,0 +1,58 @@
+"""
+Sheety API Integration Example - Read and update Google Sheet data with Basic Authentication.
+
+Features:
+- Reads all rows from a Google Sheet using Sheety API.
+- Detects missing IATA codes and updates them with a placeholder "TESTING".
+- Uses HTTP Basic Authentication with credentials loaded from environment variables.
+- Loads secrets securely from a .env file using python-dotenv.
+- Prints responses nicely with pprint.
+"""
+
+import os
+from pprint import pprint
+import requests
+from requests.auth import HTTPBasicAuth
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Constants loaded from environment variables
+SHEETY_ENDPOINT = os.getenv("SHEETY_ENDPOINT")  # e.g. "https://api.sheety.co/your_project/your_sheet/prices"
+SHEETY_USERNAME = os.getenv("SHEETY_USERNAME")
+SHEETY_PASSWORD = os.getenv("SHEETY_PASSWORD")
+
+def get_sheet_data():
+    """Fetch all rows from the Google Sheet via Sheety API."""
+    response = requests.get(SHEETY_ENDPOINT, auth=HTTPBasicAuth(SHEETY_USERNAME, SHEETY_PASSWORD))
+    response.raise_for_status()
+    data = response.json()
+    pprint(data)  # Pretty print full response JSON
+    return data["prices"]  # Adjust key if your sheet structure differs
+
+def update_iata_code(row_id, new_code):
+    """Update a single row's IATA code by row ID using a PUT request."""
+    update_url = f"{SHEETY_ENDPOINT}/{row_id}"
+    body = {
+        "price": {     # 'price' corresponds to your sheet's tab name or JSON root key
+            "iataCode": new_code
+        }
+    }
+    response = requests.put(update_url, json=body, auth=HTTPBasicAuth(SHEETY_USERNAME, SHEETY_PASSWORD))
+    response.raise_for_status()
+    print(f"Row ID {row_id} updated with IATA code: {new_code}")
+
+def main():
+    # Step 1: Read all sheet data
+    sheet_data = get_sheet_data()
+
+    # Step 2: Loop through rows, find missing IATA codes, and update them
+    for row in sheet_data:
+        if not row.get("iataCode"):  # If IATA code is empty or None
+            city = row.get("city")
+            print(f"IATA code missing for city '{city}'. Updating to 'TESTING'.")
+            update_iata_code(row["id"], "TESTING")
+
+if __name__ == "__main__":
+    main()
