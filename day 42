@@ -1,0 +1,51 @@
+<!--
+Birthday Invite Website
+Course: 100 Days of Code - The Complete Python Pro Bootcamp by Dr. Angela Yu
+Description:
+A simple birthday invitation webpage with headings, image, list of items to bring,
+address, and a Google Maps link.
+Save as "birthday_invite.html" and open in any browser.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Birthday Invitation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #fffbe6;
+      color: #333;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 2px solid #f4a261;
+      border-radius: 10px;
+      text-align: center;
+    }
+    h1 {
+      color: #e76f51;
+      font-size: 2.8em;
+      margin-bottom: 0;
+    }
+    h2 {
+      color: #f4a261;
+      margin-top: 0;
+      margin-bottom: 30px;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+      margin-bottom: 30px;
+    }
+    ul {
+      text-align: left;
+      max-width: 400px;
+      margin: 0 auto 30px auto;
+      padding-left: 20px;
+    }
+    a {
+      color: #2a9d8f;
