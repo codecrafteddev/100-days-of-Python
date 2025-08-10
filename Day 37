@@ -1,0 +1,98 @@
+"""
+Pixela Habit Tracker Example
+
+This script demonstrates how to use the Pixela API to:
+- Create a graph for tracking a habit
+- Post a pixel (log a day's data)
+- Update a pixel with PUT request
+- Delete a pixel with DELETE request
+
+You need to set your USERNAME, TOKEN, and GRAPH_ID before running.
+
+Pixela docs: https://pixe.la/
+"""
+
+import requests
+from datetime import datetime, timedelta
+
+# User-specific details
+USERNAME = "yourusername"
+TOKEN = "yourtoken"  # Your Pixela token (like a password)
+GRAPH_ID = "graph1"
+
+# Base Pixela API endpoint
+PIXELA_ENDPOINT = "https://pixe.la/v1/users"
+
+# Headers for authentication
+headers = {
+    "X-USER-TOKEN": TOKEN
+}
+
+def create_graph():
+    """Create a graph to track the habit."""
+    graph_config = {
+        "id": GRAPH_ID,
+        "name": "Cycling Graph",
+        "unit": "km",
+        "type": "float",
+        "color": "shibafu"  # green
+    }
+    response = requests.post(
+        f"{PIXELA_ENDPOINT}/{USERNAME}/graphs",
+        json=graph_config,
+        headers=headers
+    )
+    print("Create graph response:", response.text)
+
+def post_pixel(date_str, quantity):
+    """Post a new pixel (habit data) for a specific date."""
+    pixel_data = {
+        "date": date_str,  # Format: YYYYMMDD
+        "quantity": str(quantity)
+    }
+    response = requests.post(
+        f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}",
+        json=pixel_data,
+        headers=headers
+    )
+    print("Post pixel response:", response.text)
+
+def update_pixel(date_str, new_quantity):
+    """Update the pixel quantity for a given date."""
+    update_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date_str}"
+    new_pixel_data = {
+        "quantity": str(new_quantity)
+    }
+    response = requests.put(
+        update_endpoint,
+        json=new_pixel_data,
+        headers=headers
+    )
+    print("Update pixel response:", response.text)
+
+def delete_pixel(date_str):
+    """Delete the pixel for a given date."""
+    delete_endpoint = f"{PIXELA_ENDPOINT}/{USERNAME}/graphs/{GRAPH_ID}/{date_str}"
+    response = requests.delete(
+        delete_endpoint,
+        headers=headers
+    )
+    print("Delete pixel response:", response.text)
+
+if __name__ == "__main__":
+    # Uncomment and run only once to create the graph
+    # create_graph()
+
+    # Use today's date in required format
+    today = datetime.now().strftime("%Y%m%d")
+    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
+
+    # Example: Post a pixel for today
+    post_pixel(today, 7.5)  # e.g., cycled 7.5 km today
+
+    # Example: Update yesterday's pixel to a corrected value
+    update_pixel(yesterday, 4.5)
+
+    # Example: Delete pixel for 2 days ago
+    two_days_ago = (datetime.now() - timedelta(days=2)).strftime("%Y%m%d")
+    delete_pixel(two_days_ago)
