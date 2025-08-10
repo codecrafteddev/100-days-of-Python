@@ -1,0 +1,73 @@
+"""
+Day 49 Project: Snack & Lift Gym Booking Automation - Book the Upcoming Tuesday Class
+
+This script extends the automated login script to:
+- Navigate to the class schedule page after login
+- Find the upcoming Tuesday class
+- Book the Tuesday class if available
+- Handle basic success or failure cases
+
+This automates the process of reserving your gym spot for a specific day.
+"""
+
+import os
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+# User credentials and URL
+ACCOUNT_EMAIL = "your_email@test.com"
+ACCOUNT_PASSWORD = "your_password"
+GYM_URL = "https://appbrewery.github.io/gym/"
+
+def login(driver, wait):
+    """Log into the gym website."""
+    driver.get(GYM_URL)
+    join_btn = wait.until(EC.element_to_be_clickable((By.ID, "btn-join")))
+    join_btn.click()
+    login_btn = wait.until(EC.element_to_be_clickable((By.ID, "btn-login")))
+    login_btn.click()
+    email_input = wait.until(EC.presence_of_element_located((By.ID, "email-input")))
+    email_input.clear()
+    email_input.send_keys(ACCOUNT_EMAIL)
+    password_input = wait.until(EC.presence_of_element_located((By.ID, "password-input")))
+    password_input.clear()
+    password_input.send_keys(ACCOUNT_PASSWORD)
+    submit_btn = wait.until(EC.element_to_be_clickable((By.ID, "btn-submit")))
+    submit_btn.click()
+    wait.until(EC.presence_of_element_located((By.XPATH, "//h1[contains(text(), 'Class Schedule')]")))
+    print("✅ Logged in successfully!")
+
+def book_tuesday_class(driver, wait):
+    """Find and book the upcoming Tuesday class."""
+    # Assuming class schedule page is loaded
+
+    # Find all class elements for Tuesday (assuming data-day or text contains "Tuesday")
+    # This depends on the site structure; here's a generic approach:
+    tuesday_classes = wait.until(
+        EC.presence_of_all_elements_located((By.XPATH, "//div[contains(@class, 'class-card') and contains(., 'Tuesday')]"))
+    )
+    if not tuesday_classes:
+        print("❌ No Tuesday classes found.")
+        return
+
+    # Pick the first upcoming Tuesday class
+    tuesday_class = tuesday_classes[0]
+
+    # Check if the class is already booked or full by looking for specific text or buttons
+    book_button = tuesday_class.find_element(By.TAG_NAME, "button")
+
+    if book_button.is_enabled():
+        book_button.click()
+        print("✅ Tuesday class booked successfully!")
+    else:
+        print("⚠️ Tuesday class is not available for booking.")
+
+def main():
+    chrome_options = Options()
+    user_data_dir = os.path.join(os.getcwd(), "chrome_profile")
+    if not os.path.exists(user_data_dir):
+        os.mkdir(user_data_dir)
+    chrome_options.add_argument(f"--user-data-dir={user_data_dir}")
