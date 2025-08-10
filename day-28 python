@@ -1,0 +1,37 @@
+# Brief Description:
+# This project is a simple Travel Log manager in Python.
+# It uses a list of dictionaries to store countries visited, 
+# how many times you visited them, and the cities you visited.
+# It also includes a function to add new entries to the travel log.
+
+# Initial travel log data
+travel_log = [
+    {
+        "country": "France",
+        "visits": 12,
+        "cities": ["Paris", "Lille", "Dijon"]
+    },
+    {
+        "country": "Germany",
+        "visits": 5,
+        "cities": ["Berlin", "Hamburg", "Stuttgart"]
+    },
+]
+
+# Function to add a new country to the travel log
+def add_new_country(country_visited, times_visited, cities_visited):
+    new_country = {
+        "country": country_visited,
+        "visits": times_visited,
+        "cities": cities_visited
+    }
+    travel_log.append(new_country)
+
+# Example usage
+add_new_country("Russia", 2, ["Moscow", "Saint Petersburg"])
+add_new_country("Japan", 3, ["Tokyo", "Kyoto", "Osaka"])
+
+# Print final travel log
+print("Updated Travel Log:")
+for entry in travel_log:
+    print(f"{entry['country']} - Visits: {entry['visits']}, Cities: {', '.join(entry['cities'])}")
