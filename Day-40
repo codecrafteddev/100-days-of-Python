@@ -1,0 +1,95 @@
+"""
+Flight Deals Email Notification - Reads user emails from Google Sheets and sends flight deal emails.
+
+Features:
+- Reads user data (first name, last name, email) from the 'users' sheet via Sheety API.
+- Reads flight deals data from the 'prices' sheet.
+- Sends emails to all users with details of flight deals below threshold.
+- Uses environment variables for API keys, Sheety endpoints, and email credentials.
+- Demonstrates authenticated GET requests with Sheety and email sending via SMTP.
+
+Note:
+- You must create a Google Form linked to your Google Sheet with a 'users' tab.
+- Enable POST and PUT in Sheety for both sheets.
+- Replace placeholders with your actual data and credentials.
+"""
+
+import os
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from pprint import pprint
+import requests
+from requests.auth import HTTPBasicAuth
+from dotenv import load_dotenv
+
+# Load env variables from .env file
+load_dotenv()
+
+# Sheety endpoints for prices and users sheets
+SHEETY_PRICES_ENDPOINT = os.getenv("SHEETY_PRICES_ENDPOINT")  # e.g. "https://api.sheety.co/your_project/flightDeals/prices"
+SHEETY_USERS_ENDPOINT = os.getenv("SHEETY_USERS_ENDPOINT")    # e.g. "https://api.sheety.co/your_project/flightDeals/users"
+
+# Sheety credentials for Basic Auth
+SHEETY_USERNAME = os.getenv("SHEETY_USERNAME")
+SHEETY_PASSWORD = os.getenv("SHEETY_PASSWORD")
+
+# Email credentials
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+
+def get_sheet_data(endpoint):
+    """Fetch data from given Sheety API endpoint."""
+    response = requests.get(endpoint, auth=HTTPBasicAuth(SHEETY_USERNAME, SHEETY_PASSWORD))
+    response.raise_for_status()
+    data = response.json()
+    return data
+
+def send_email(to_email, subject, body):
+    """Send an email using SMTP."""
+    msg = MIMEMultipart()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_email
+    msg['Subject'] = subject
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as connection:
+        connection.starttls()
+        connection.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        connection.send_message(msg)
+    print(f"Email sent to {to_email}")
+
+def main():
+    # Get users data
+    users_data = get_sheet_data(SHEETY_USERS_ENDPOINT)
+    # Usually the key matches the sheet name, e.g., 'users'
+    users = users_data.get("users", [])
+    print("Users:")
+    pprint(users)
+
+    # Get flight prices data
+    prices_data = get_sheet_data(SHEETY_PRICES_ENDPOINT)
+    prices = prices_data.get("prices", [])
+    print("Flight Deals:")
+    pprint(prices)
+
+    # For demo, send email if price is below stored lowestPrice
+    for price in prices:
+        if price.get("lowestPrice") and price.get("price") and price["price"] < price["lowestPrice"]:
+            message = (
+                f"Low price alert! Only ${price['price']} to fly from {price['originCity']} "
+                f"to {price['destinationCity']}, from {price['outDate']} to {price['returnDate']}."
+            )
+            subject = "New Flight Deal!"
+
+            for user in users:
+                first_name = user.get("firstName", "")
+                email = user.get("email", "")
+                personalized_message = f"Hi {first_name},\n\n{message}\n\nHappy travels!"
+                send_email(email, subject, personalized_message)
+
+if __name__ == "__main__":
+    main()
