@@ -1,0 +1,89 @@
+"""
+ISS Overhead Notifier
+
+This script checks if the International Space Station (ISS) is currently overhead (within ±5 degrees)
+your location and if it is nighttime at your location. If both conditions are true,
+it sends an email notification to prompt you to look up and spot the ISS.
+
+The script runs continuously, checking every 60 seconds.
+
+Key features:
+- Uses APIs to get ISS current position and local sunrise/sunset times.
+- Checks if ISS is within ±5 degrees latitude and longitude of your location.
+- Checks if current time is after sunset or before sunrise (nighttime).
+- Sends an email notification when conditions are met.
+- Runs in a loop with 60 seconds delay between checks.
+
+Replace MY_EMAIL and MY_PASSWORD with your actual credentials.
+"""
+
+import requests
+from datetime import datetime
+import smtplib
+import time
+
+# Your location coordinates
+MY_LAT = 51.5074    # Example: London latitude
+MY_LONG = -0.1278   # Example: London longitude
+
+# Your email credentials
+MY_EMAIL = "your_email@gmail.com"
+MY_PASSWORD = "your_password"
+
+def is_iss_overhead():
+    """Check if ISS is within ±5 degrees of user's location."""
+    response = requests.get(url="http://api.open-notify.org/iss-now.json")
+    response.raise_for_status()
+    data = response.json()
+
+    iss_latitude = float(data["iss_position"]["latitude"])
+    iss_longitude = float(data["iss_position"]["longitude"])
+
+    # Check if ISS is within ±5 degrees of user's location
+    lat_close = MY_LAT - 5 <= iss_latitude <= MY_LAT + 5
+    long_close = MY_LONG - 5 <= iss_longitude <= MY_LONG + 5
+
+    return lat_close and long_close
+
+def is_night():
+    """Check if it is currently nighttime at user's location."""
+    parameters = {
+        "lat": MY_LAT,
+        "lng": MY_LONG,
+        "formatted": 0,  # Get ISO time format
+    }
+
+    response = requests.get("https://api.sunrise-sunset.org/json", params=parameters)
+    response.raise_for_status()
+    data = response.json()
+
+    sunrise = data["results"]["sunrise"]
+    sunset = data["results"]["sunset"]
+
+    # Extract hour from ISO format e.g. "2024-08-10T04:32:00+00:00"
+    sunrise_hour = int(sunrise.split("T")[1].split(":")[0])
+    sunset_hour = int(sunset.split("T")[1].split(":")[0])
+
+    # Current time in UTC
+    time_now = datetime.utcnow()
+    current_hour = time_now.hour
+
+    # It is night if current hour is after sunset or before sunrise
+    return current_hour >= sunset_hour or current_hour <= sunrise_hour
+
+def send_email():
+    """Send an email notification that the ISS is overhead."""
+    with smtplib.SMTP("smtp.gmail.com", port=587) as connection:
+        connection.starttls()
+        connection.login(MY_EMAIL, MY_PASSWORD)
+        connection.sendmail(
+            from_addr=MY_EMAIL,
+            to_addrs=MY_EMAIL,
+            msg="Subject:Look Up! 🚀\n\nThe ISS is above you in the sky."
+        )
+
+# Main loop to continuously check conditions every 60 seconds
+while True:
+    time.sleep(60)
+    if is_iss_overhead() and is_night():
+        send_email()
