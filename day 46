@@ -1,0 +1,68 @@
+# main.py
+import os
+import requests
+from bs4 import BeautifulSoup
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
+
+# --------- User Input ---------
+date = input("Which year do you want to travel to? Type the date in this format YYYY-MM-DD: ")
+
+# --------- Scrape Billboard Hot 100 ---------
+URL = f"https://www.billboard.com/charts/hot-100/{date}/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                  "AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/135.0.0.0 Safari/537.36"
+}
+
+response = requests.get(URL, headers=headers)
+response.raise_for_status()
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+# Billboard page's structure may change; this selector works as of now:
+song_tags = soup.find_all(
+    name="h3",
+    class_="c-title a-no-trucate a-font-primary-bold-s u-letter-spacing-0021 "
+          "lrv-u-font-size-18@tablet lrv-u-font-size-16 u-line-height-125 "
+          "u-line-height-normal@mobile-max a-truncate-ellipsis u-max-width-330 "
+          "u-max-width-230@tablet-only"
+)
+
+songs = [tag.getText(strip=True) for tag in song_tags]
+
+print(f"Top 100 songs on {date}:")
+for i, song in enumerate(songs, 1):
+    print(f"{i}. {song}")
+
+# --------- Spotify Authentication ---------
+SPOTIPY_CLIENT_ID = "YOUR_CLIENT_ID_HERE"
+SPOTIPY_CLIENT_SECRET = "YOUR_CLIENT_SECRET_HERE"
+SPOTIPY_REDIRECT_URI = "http://example.com"  # Must match your Spotify Developer Dashboard
+
+scope = "playlist-modify-private"
+
+sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
+    scope=scope,
+    redirect_uri=SPOTIPY_REDIRECT_URI,
+    client_id=SPOTIPY_CLIENT_ID,
+    client_secret=SPOTIPY_CLIENT_SECRET,
+    show_dialog=True,
+    cache_path="token.txt"
+))
+
+user_id = sp.current_user()["id"]
+print(f"Authenticated Spotify user ID: {user_id}")
+
+# Optionally, create a new private playlist with the date in the name
+playlist_name = f"{date} Billboard 100"
+playlist = sp.user_playlist_create(user=user_id, name=playlist_name, public=False, description="Top 100 songs scraped from Billboard.")
+
+print(f"Created playlist: {playlist_name} (ID: {playlist['id']})")
+
+# To add tracks, you need Spotify track URIs
+# This step requires searching each song on Spotify (not included here for brevity)
+# Example:
+# results = sp.search(q=songs[0], limit=1, type="track")
+# track_uri = results['tracks']['items'][0]()_
