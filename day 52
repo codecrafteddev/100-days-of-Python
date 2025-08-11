@@ -1,0 +1,74 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+
+# Constants (replace with your info)
+PROMISED_DOWN = 150  # Mbps download speed promised by ISP
+PROMISED_UP = 10     # Mbps upload speed promised by ISP
+TWITTER_EMAIL = "your_twitter_email@example.com"
+TWITTER_PASSWORD = "your_twitter_password"
+ISP_TWITTER_HANDLE = "@YourISP"  # e.g. "@Comcast"
+
+class InternetSpeedTwitterBot:
+    def __init__(self):
+        chrome_options = Options()
+        chrome_options.add_argument("--start-maximized")
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.down = 0
+        self.up = 0
+    
+    def get_internet_speed(self):
+        self.driver.get("https://www.speedtest.net/")
+        wait = WebDriverWait(self.driver, 60)
+        
+        # Click the "Go" button to start the test
+        go_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".start-button a")))
+        go_button.click()
+        
+        # Wait for the test to complete (results appear)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".result-item-download .download-speed")))
+        
+        # Add a delay to be safe (depending on internet speed, can adjust)
+        time.sleep(30)  
+        
+        # Extract download speed
+        download_speed = self.driver.find_element(By.CSS_SELECTOR, ".download-speed").text
+        # Extract upload speed
+        upload_speed = self.driver.find_element(By.CSS_SELECTOR, ".upload-speed").text
+        
+        self.down = float(download_speed)
+        self.up = float(upload_speed)
+        
+        print(f"Download speed: {self.down} Mbps")
+        print(f"Upload speed: {self.up} Mbps")
+    
+    def tweet_at_provider(self):
+        self.driver.get("https://twitter.com/login")
+        wait = WebDriverWait(self.driver, 30)
+        
+        # Log in
+        email_input = wait.until(EC.presence_of_element_located((By.NAME, "text")))
+        email_input.send_keys(TWITTER_EMAIL)
+        next_button = self.driver.find_element(By.XPATH, '//div[@role="button" and contains(text(), "Next")]')
+        next_button.click()
+        
+        # Wait and enter password (sometimes login requires email then password)
+        password_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
+        password_input.send_keys(TWITTER_PASSWORD)
+        login_button = self.driver.find_element(By.XPATH, '//div[@role="button" and contains(text(), "Log in")]')
+        login_button.click()
+        
+        # Wait until home page loads and Tweet box appears
+        tweet_box = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[aria-label='Tweet text']")))
+        
+        # Compose tweet
+        tweet = (f"{ISP_TWITTER_HANDLE} My internet speed is {self.down}Mbps down / {self.up}Mbps up, "
+                 f"but you promised {PROMISED_DOWN}Mbps down / {PROMISED_UP}Mbps up. "
+                 "Please fix this!")
+        tweet_box.send_keys(tweet)
+        
+        # Click the Tweet button
+        tweet_button = self.driver.find_element(By.XPATH, '//div[@data-testid="tweetButtonInline"]')
