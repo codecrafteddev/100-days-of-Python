@@ -1,0 +1,77 @@
+"""
+Web Scraping and Data Entry Capstone Project
+
+This project scrapes property listings (prices, addresses, and links) from a Zillow-Clone site
+using BeautifulSoup, cleans the data, and uses Selenium to automatically fill a Google Form
+with the scraped information. The form responses will then compile into a Google Sheet for easy tracking.
+"""
+
+import requests
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+import time
+
+# --------- Step 1: Set your constants ---------
+GOOGLE_FORM_URL = "YOUR_GOOGLE_FORM_URL_HERE"
+
+ZILLOW_CLONE_URL = "https://appbrewery.github.io/Zillow-Clone/"
+
+HEADERS = {
+    "User-Agent": "Your User Agent Here",
+    "Accept-Language": "en-US,en;q=0.9"
+}
+
+# --------- Step 2: Scrape the listings ---------
+response = requests.get(ZILLOW_CLONE_URL, headers=HEADERS)
+soup = BeautifulSoup(response.text, "html.parser")
+
+prices = [price.get_text() for price in soup.select(".list-card-price")]
+addresses = [addr.get_text() for addr in soup.select(".list-card-addr")]
+links = [link["href"] for link in soup.select(".list-card-info a")]
+
+# Clean prices - remove '+' and extra text
+clean_prices = []
+for price in prices:
+    price = price.split("+")[0].split("/")[0].strip()
+    clean_prices.append(price)
+
+# Clean addresses - remove newlines, pipes, and whitespace
+clean_addresses = []
+for addr in addresses:
+    addr = addr.replace("\n", " ").replace("|", "").strip()
+    clean_addresses.append(addr)
+
+# Fix links - prepend domain if relative link
+clean_links = []
+for link in links:
+    if link.startswith("/"):
+        link = "https://appbrewery.github.io" + link
+    clean_links.append(link)
+
+# --------- Step 3: Use Selenium to fill the form ---------
+driver = webdriver.Chrome()
+
+for i in range(len(clean_prices)):
+    driver.get(GOOGLE_FORM_URL)
+    time.sleep(2)  # Let the page load
+
+    # Fill in the Price
+    price_input = driver.find_element(By.XPATH, '//input[@aria-label="Price"]')
+    price_input.send_keys(clean_prices[i])
+
+    # Fill in the Address
+    address_input = driver.find_element(By.XPATH, '//input[@aria-label="Address"]')
+    address_input.send_keys(clean_addresses[i])
+
+    # Fill in the Link
+    link_input = driver.find_element(By.XPATH, '//input[@aria-label="Link"]')
+    link_input.send_keys(clean_links[i])
+
+    # Submit the form
+    submit_button = driver.find_element(By.XPATH, '//span[text()="Submit"]/..')
+    submit_button.click()
+    time.sleep(2)  # Wait before filling the next form
+
+driver.quit()
