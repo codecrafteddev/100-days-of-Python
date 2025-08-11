@@ -1,0 +1,23 @@
+"""
+Python Decorator Basics
+
+A decorator is a function that takes another function as input, extends or modifies its behavior,
+and returns a new function without changing the original function’s code.
+
+Decorators are commonly used for logging, authentication, timing functions, and more.
+
+This example demonstrates a simple decorator that logs when a function is called.
+"""
+
+def my_decorator(func):
+    def wrapper():
+        print(f"Function '{func.__name__}' is about to run.")
+        func()
+        print(f"Function '{func.__name__}' has finished running.")
+    return wrapper
+
+@my_decorator
+def say_hello():
+    print("Hello, world!")
+
+say_hello()
