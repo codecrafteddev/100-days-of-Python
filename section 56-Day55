@@ -1,0 +1,51 @@
+"""
+Final Project - Higher or Lower Game with Flask
+
+This Flask app lets users guess a random number between 0 and 9 by entering it in the URL.
+The home page displays instructions and a fun GIF.
+When the user guesses a number by navigating to /<number>, the app responds with feedback:
+- Too high
+- Too low
+- Correct guess
+
+Each response shows a different colored message and a relevant GIF.
+
+"""
+
+from flask import Flask
+import random
+
+app = Flask(__name__)
+
+# Generate a random number once when the server starts
+random_number = random.randint(0, 9)
+
+@app.route("/")
+def home():
+    return """
+    <h1>Guess a number between 0 and 9</h1>
+    <img src="https://media.giphy.com/media/3o7aCSPqXE5C6T8tBC/giphy.gif" alt="Guess the number" />
+    """
+
+@app.route("/<int:guess>")
+def guess_number(guess):
+    if guess < random_number:
+        color = "blue"
+        message = f"<h1 style='color:{color};'>{guess} is too low!</h1>"
+        gif = "https://media.giphy.com/media/jD4DwBtqPXRXa/giphy.gif"
+    elif guess > random_number:
+        color = "red"
+        message = f"<h1 style='color:{color};'>{guess} is too high!</h1>"
+        gif = "https://media.giphy.com/media/3o6ZtaO9BZHcOjmErm/giphy.gif"
+    else:
+        color = "green"
+        message = f"<h1 style='color:{color};'>{guess} is just right! You win! 🎉</h1>"
+        gif = "https://media.giphy.com/media/4T7e4DmcrP9du/giphy.gif"
+
+    return f"""
+    {message}
+    <img src="{gif}" alt="Feedback gif" />
+    """
+
+if __name__ == "__main__":
+    app.run(debug=True)
